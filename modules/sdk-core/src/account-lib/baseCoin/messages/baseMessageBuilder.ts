@@ -2,7 +2,7 @@ import { BroadcastableMessage, MessageOptions, MessagePayload, MessageStandardTy
 import { BaseCoin as CoinConfig } from '@bitgo/statics';
 import { IMessage, IMessageBuilder } from './iface';
 import { deserializeSignatures, Signature } from '../iface';
-import { isMessageWhitelisted } from './index';
+import { isMessageWhitelisted, MIDNIGHT_GLACIER_DROP_CLAIM_MESSAGE_TEMPLATE } from './index';
 
 /**
  * Base Message Builder
@@ -13,7 +13,7 @@ export abstract class BaseMessageBuilder implements IMessageBuilder {
   protected type: MessageStandardType;
   protected signatures: Signature[] = [];
   protected signers: string[] = [];
-  protected whitelistedMessageTemplates: string[] = [];
+  protected whitelistedMessageTemplates: Record<string, string> = {};
   protected metadata?: Record<string, unknown> = {};
   protected digest?: string;
 
@@ -28,6 +28,7 @@ export abstract class BaseMessageBuilder implements IMessageBuilder {
   ) {
     this.coinConfig = coinConfig;
     this.type = messageType;
+    this.whitelistedMessageTemplates = this.getWhitelistedMessageTemplates();
   }
 
   /**
@@ -172,5 +173,12 @@ export abstract class BaseMessageBuilder implements IMessageBuilder {
       encoding: 'utf8',
     };
     return this.build();
+  }
+
+  protected getWhitelistedMessageTemplates(): Record<string, string> {
+    return {
+      midnightGDClaimMsgTemplate: MIDNIGHT_GLACIER_DROP_CLAIM_MESSAGE_TEMPLATE,
+      // Add more whitelisted templates as needed
+    };
   }
 }
