@@ -1864,20 +1864,20 @@ export function tsolToken(
 }
 
 /**
- * Factory function for ada token instances.
- *
- * @param id uuid v4
- * @param name unique identifier of the token
- * @param fullName Complete human-readable name of the token
- * @param decimalPlaces Number of decimal places this token supports (divisibility exponent)
- * @param tokenSymbol Token symbol of this token
- * @param asset Asset which this coin represents. This is the same for both mainnet and testnet variants of a coin.
- * @param prefix? Optional token prefix. Defaults to empty string
- * @param suffix? Optional token suffix. Defaults to token name.
- * @param network? Optional token network. Defaults to Cardano main network.
- * @param features? Features of this coin. Defaults to the DEFAULT_FEATURES and REQUIRES_RESERVE defined in `AccountCoin`
- * @param primaryKeyCurve The elliptic curve for this chain/token
- */
+ *  * Factory function for cardano token instances.
+ *  *
+ *  * @param id uuid v4
+ *  * @param name Name of the token
+ *  * @param fullName Complete human-readable name of the token
+ *  * @param decimalPlaces Number of decimal places this token supports (divisibility exponent)
+ *  * @param policyId Policy Id of this token
+ *  * @param assetName Name of the token according to the chain
+ *  * @param asset Underlying asset
+ *  * @param features? Features of this coin. Defaults to the DEFAULT_FEATURES and REQUIRES_RESERVE defined in `AccountCoin`
+ *  * @param prefix? Optional token prefix. Defaults to empty string
+ *  * @param suffix? Optional token suffix. Defaults to token name.
+ *  * @param network? Optional token network. Defaults to the testnet Cardano network.
+ *  */
 export function adaToken(
   id: string,
   name: string,
@@ -1916,15 +1916,16 @@ export function adaToken(
  * Factory function for testnet cardano token instances.
  *
  * @param id uuid v4
- * @param name unique identifier of the token
+ * @param name Name of the token
  * @param fullName Complete human-readable name of the token
  * @param decimalPlaces Number of decimal places this token supports (divisibility exponent)
- * @param tokenSymbol Token symbol of this token i.e: AUSD
- * @param asset Asset which this coin represents. This is the same for both mainnet and testnet variants of a coin.
+ * @param policyId Policy Id of this token
+ * @param assetName Name of the token according to the chain
+ * @param asset Underlying asset
+ * @param features? Features of this coin. Defaults to the DEFAULT_FEATURES and REQUIRES_RESERVE defined in `AccountCoin`
  * @param prefix? Optional token prefix. Defaults to empty string
  * @param suffix? Optional token suffix. Defaults to token name.
  * @param network? Optional token network. Defaults to the testnet Cardano network.
- * @param features? Features of this coin. Defaults to the DEFAULT_FEATURES and REQUIRES_RESERVE defined in `AccountCoin`
  */
 export function tadaToken(
   id: string,
