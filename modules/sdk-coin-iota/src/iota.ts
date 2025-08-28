@@ -2,16 +2,22 @@ import {
   AuditDecryptedKeyParams,
   BaseCoin,
   BitGoBase,
-  KeyPair as KeyPairInterface,
+  KeyPair,
   ParseTransactionOptions,
   ParsedTransaction,
   SignTransactionOptions,
   SignedTransaction,
   VerifyAddressOptions,
   VerifyTransactionOptions,
+  MultisigType,
+  multisigTypes,
+  MPCAlgorithm,
+  InvalidAddressError,
 } from '@bitgo/sdk-core';
 import { BaseCoin as StaticsBaseCoin, CoinFamily } from '@bitgo/statics';
 import utils from './lib/utils';
+import { KeyPair as IotaKeyPair } from './lib';
+import { auditEddsaPrivateKey } from '@bitgo/sdk-lib-mpc';
 
 export class Iota extends BaseCoin {
   protected readonly _staticsCoin: Readonly<StaticsBaseCoin>;
@@ -46,6 +52,20 @@ export class Iota extends BaseCoin {
     return this._staticsCoin.fullName;
   }
 
+  /** @inheritDoc */
+  supportsTss(): boolean {
+    return true;
+  }
+
+  /** inherited doc */
+  getDefaultMultisigType(): MultisigType {
+    return multisigTypes.tss;
+  }
+
+  getMPCAlgorithm(): MPCAlgorithm {
+    return 'eddsa';
+  }
+
   /**
    * Check if an address is valid
    * @param address the address to be validated
@@ -70,7 +90,12 @@ export class Iota extends BaseCoin {
    * @param params
    */
   async isWalletAddress(params: VerifyAddressOptions): Promise<boolean> {
-    return this.isValidAddress(params.address);
+    const { address: newAddress } = params;
+
+    if (!this.isValidAddress(newAddress)) {
+      throw new InvalidAddressError(`invalid address: ${newAddress}`);
+    }
+    return true;
   }
 
   /**
@@ -86,12 +111,15 @@ export class Iota extends BaseCoin {
    * Generate a key pair
    * @param seed Optional seed to generate key pair from
    */
-  generateKeyPair(seed?: Uint8Array): KeyPairInterface {
-    // For now we're just returning an empty implementation as the KeyPair class needs to be implemented
-    // In a real implementation, we would use the KeyPair class properly
+  generateKeyPair(seed?: Buffer): KeyPair {
+    const keyPair = seed ? new IotaKeyPair({ seed }) : new IotaKeyPair();
+    const keys = keyPair.getKeys();
+    if (!keys.prv) {
+      throw new Error('Missing prv in key generation.');
+    }
     return {
-      pub: '',
-      prv: '',
+      pub: keys.pub,
+      prv: keys.prv,
     };
   }
 
@@ -100,8 +128,7 @@ export class Iota extends BaseCoin {
    * @param pub Public key to check
    */
   isValidPub(pub: string): boolean {
-    // TODO: Implement proper IOTA public key validation
-    return pub.length > 0;
+    return utils.isValidPublicKey(pub);
   }
 
   /**
@@ -110,18 +137,17 @@ export class Iota extends BaseCoin {
    */
   async signTransaction(params: SignTransactionOptions): Promise<SignedTransaction> {
     // TODO: Add IOTA-specific transaction signing logic
-    return {
-      halfSigned: {
-        txHex: '',
-      },
-    };
+    throw new Error('Method not implemented.');
   }
 
   /**
    * Audit a decrypted private key to ensure it's valid
    * @param params
    */
-  auditDecryptedKey(params: AuditDecryptedKeyParams): void {
-    // TODO: Implement IOTA-specific key validation logic
+  auditDecryptedKey({ multiSigType, prv, publicKey }: AuditDecryptedKeyParams): void {
+    if (multiSigType !== 'tss') {
+      throw new Error('Unsupported multiSigType');
+    }
+    auditEddsaPrivateKey(prv, publicKey ?? '');
   }
 }
